@@ -54,14 +54,10 @@ public class DataPermissionsInterceptor implements Interceptor {
         // 0、获取用户权限
         List<UserDataPermission> userDataPermissions = new ArrayList<>();
         List<String> accDateValue = new ArrayList<>();
-        accDateValue.add("2023-02-02");
-        accDateValue.add("2023-03-03");
-        userDataPermissions.add(new UserDataPermission("acc_date",accDateValue));
+        userDataPermissions.add(new UserDataPermission("acc_date",1,"2023-02-02,2023-03-03"));
 
         List<String> storeValue = new ArrayList<>();
-        storeValue.add("819");
-        storeValue.add("820");
-        userDataPermissions.add(new UserDataPermission("store_code",storeValue));
+        userDataPermissions.add(new UserDataPermission("store_code",1,"819,820"));
 
         UserDO user = new UserDO(1L,"小民",userDataPermissions);
 
@@ -138,22 +134,16 @@ public class DataPermissionsInterceptor implements Interceptor {
         try {
             List<String> conditions = new ArrayList<>();
             for(UserDataPermission userDataPermission:list){
-                String permissionSql = "(";
                 String fieldName = userDataPermission.getFieldName();
-                List<String>  values = userDataPermission.getValues();
+                int type = userDataPermission.getPermissionType();
+                String[] values = userDataPermission.getValues().split(",");
 
-                if (values.size() > 0) {
-                    for (String deptId : values) {
-                        if ("(".equals(permissionSql)) {
-                            permissionSql = permissionSql + deptId;
-                        } else {
-                            permissionSql = permissionSql + "," + deptId;
-                        }
-                    }
-                    permissionSql = permissionSql + ")";
-                    // 修改原语句
-                    conditions.add(fieldName + " in " + permissionSql);
+                String condition = getConditions(fieldName,type,values);
+
+                if(condition != ""){
+                    conditions.add(condition);
                 }
+
             }
                 if (conditions.size() == 0) {
                     return sql;
@@ -184,6 +174,30 @@ public class DataPermissionsInterceptor implements Interceptor {
         }
 
     }
+    public static String getConditions(String fieldName,int type,String[] values){
+        switch (type){
+            case 1:
+                    {
+                        String permissionSql = "(";
+                        if (values.length > 0) {
+                            for (String deptId : values) {
+                                if ("(".equals(permissionSql)) {
+                                    permissionSql = permissionSql + deptId;
+                                } else {
+                                    permissionSql = permissionSql + "," + deptId;
+                                }
+                            }
+                            permissionSql = permissionSql + ")";
+                            // 修改原语句
+                            return fieldName + " in " + permissionSql;
+                        }
+                    }
+            default :
+                return "";
+        }
+    }
+
+
 
 
 

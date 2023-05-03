@@ -6,14 +6,22 @@ public class UserDataPermission {
 
     private String fieldName;
 
-    private List<String> values;
+    private int permissionType;
+
+    private String values;
 
     public UserDataPermission(){
 
     }
 
-    public UserDataPermission(String fieldName ,List<String> values){
+    public UserDataPermission(String fieldName, String values) {
         this.fieldName = fieldName;
+        this.values = values;
+    }
+
+    public UserDataPermission(String fieldName, int permissionType, String values) {
+        this.fieldName = fieldName;
+        this.permissionType = permissionType;
         this.values = values;
     }
 
@@ -25,11 +33,19 @@ public class UserDataPermission {
         this.fieldName = fieldName;
     }
 
-    public List<String> getValues() {
+    public int getPermissionType() {
+        return permissionType;
+    }
+
+    public void setPermissionType(int permissionType) {
+        this.permissionType = permissionType;
+    }
+
+    public String getValues() {
         return values;
     }
 
-    public void setValues(List<String> values) {
+    public void setValues(String values) {
         this.values = values;
     }
 }

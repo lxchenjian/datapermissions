@@ -24,10 +24,8 @@ public class UserDO {
     public UserDO(Long id, String name) {
         this.id = id;
         this.name = name;
-        List<String> list= new ArrayList<String>();
-        list.add("2023-01-01");
         this.dataPermission = new ArrayList<>();
-        this.dataPermission.add(new UserDataPermission("acc_date",list));
+        this.dataPermission.add(new UserDataPermission("acc_date","2023-01-01"));
     }
 
     public Long getId() {

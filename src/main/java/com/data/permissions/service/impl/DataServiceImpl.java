@@ -18,8 +18,8 @@ public class DataServiceImpl implements DataService {
     private DataMapper dataMapper;
     @Override
     public List<DaySaleDO> getDaySale() {
-        //List<DaySaleDO> users = dataMapper.getDaySale();
-        List<DaySaleDO> users = dataMapper.selectList(new LambdaQueryWrapper<>());
+        List<DaySaleDO> users = dataMapper.getDaySale();
+        //List<DaySaleDO> users = dataMapper.selectList(new LambdaQueryWrapper<>());
         return users;
     }
 }
