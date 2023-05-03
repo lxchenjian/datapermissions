@@ -20,6 +20,7 @@ public class DataController {
     @GetMapping("/getSaleDate")
     public int getSaleDate(){
         List<DaySaleDO> list  = dataService.getDaySale();
+
         return 1;
     }
 }

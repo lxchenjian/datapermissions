@@ -9,8 +9,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target(ElementType.METHOD)
 @Retention(RUNTIME)
-public @interface DataPermissions {
-    String dataParam() default "";
+public @interface DataPermission {
+
+
+    String value() default "";
+    boolean openOrClose() default true;
 
 
 }

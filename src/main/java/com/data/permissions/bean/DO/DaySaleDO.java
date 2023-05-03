@@ -2,12 +2,14 @@ package com.data.permissions.bean.DO;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Objects;
 
+@TableName("gds_day_sale")
 public class DaySaleDO implements Serializable {
 
     private static final long serialVersionUID = 253797867143783195L;
@@ -76,13 +78,6 @@ public class DaySaleDO implements Serializable {
      */
     @TableField(exist = false)
     private BigDecimal grossAmt;
-    /**
-     * 更新时间
-     *
-     */
-    @TableField(value = "updated_at",fill = FieldFill.INSERT_UPDATE)
-    private Date updatedAt;
-
 
     public String getAccDate() {
         return accDate;
@@ -172,25 +167,17 @@ public class DaySaleDO implements Serializable {
         this.grossAmt = grossAmt;
     }
 
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DaySaleDO daySaleDO = (DaySaleDO) o;
-        return Objects.equals(accDate, daySaleDO.accDate) && Objects.equals(storeCode, daySaleDO.storeCode) && Objects.equals(goodsCode, daySaleDO.goodsCode) && Objects.equals(categoryCode, daySaleDO.categoryCode) && Objects.equals(saleQty, daySaleDO.saleQty) && Objects.equals(shouldAmt, daySaleDO.shouldAmt) && Objects.equals(actualAmt, daySaleDO.actualAmt) && Objects.equals(costAmt, daySaleDO.costAmt) && Objects.equals(carryOverStock, daySaleDO.carryOverStock) && Objects.equals(saleNumber, daySaleDO.saleNumber) && Objects.equals(grossAmt, daySaleDO.grossAmt) && Objects.equals(updatedAt, daySaleDO.updatedAt);
+        return Objects.equals(accDate, daySaleDO.accDate) && Objects.equals(storeCode, daySaleDO.storeCode) && Objects.equals(goodsCode, daySaleDO.goodsCode) && Objects.equals(categoryCode, daySaleDO.categoryCode) && Objects.equals(saleQty, daySaleDO.saleQty) && Objects.equals(shouldAmt, daySaleDO.shouldAmt) && Objects.equals(actualAmt, daySaleDO.actualAmt) && Objects.equals(costAmt, daySaleDO.costAmt) && Objects.equals(carryOverStock, daySaleDO.carryOverStock) && Objects.equals(saleNumber, daySaleDO.saleNumber) && Objects.equals(grossAmt, daySaleDO.grossAmt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(accDate, storeCode, goodsCode, categoryCode, saleQty, shouldAmt, actualAmt, costAmt, carryOverStock, saleNumber, grossAmt, updatedAt);
+        return Objects.hash(accDate, storeCode, goodsCode, categoryCode, saleQty, shouldAmt, actualAmt, costAmt, carryOverStock, saleNumber, grossAmt);
     }
 
     @Override
@@ -207,7 +194,6 @@ public class DaySaleDO implements Serializable {
                 ", carryOverStock=" + carryOverStock +
                 ", saleNumber=" + saleNumber +
                 ", grossAmt=" + grossAmt +
-                ", updatedAt=" + updatedAt +
                 '}';
     }
 }
