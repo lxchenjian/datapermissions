@@ -8,6 +8,6 @@
     <select id="getDaySale" resultType="com.data.permissions.bean.DO.DaySaleDO">
         select
             *
-        from gds_day_sale
+        from gds_day_sale a
     </select>
 </mapper>

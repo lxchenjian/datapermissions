@@ -6,6 +6,7 @@ import com.data.permissions.annotation.DataPermission;
 import com.data.permissions.bean.DO.UserDO;
 import com.data.permissions.bean.DO.UserDataPermission;
 import com.data.permissions.util.ClassUtil;
+import com.data.permissions.util.ThreadLocalUtil;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -26,10 +27,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -84,8 +82,7 @@ public class DataPermissionsInterceptor implements Interceptor {
         String newId = mappedStatement.getId().substring(0, mappedStatement.getId().lastIndexOf("."));
         String newName = mappedStatement.getId().substring(mappedStatement.getId().lastIndexOf(".") + 1, mappedStatement.getId().length());
         // 获取注解的参数值 判断是否数据拦截
-        boolean isPermi = false;
-        String value = "";
+        String value = ThreadLocalUtil.getDataPermissions();
         Class<?> clazz = Class.forName(newId);
         //遍历方法
         for (Method method : clazz.getDeclaredMethods()) {
@@ -93,31 +90,24 @@ public class DataPermissionsInterceptor implements Interceptor {
             if (method.isAnnotationPresent(DataPermission.class) && newName.equals(method.getName())) {
                 DataPermission dataPermission =  method.getAnnotation(DataPermission.class);
                 if (dataPermission != null) {
-                    //不验证
-                    if (!dataPermission.openOrClose()) {
-                        isPermi = false;
-                    } else { //开启验证
-                        isPermi = true;
-                    }
-                    value = dataPermission.value();
+                    if(value !="" && dataPermission.value() !="") {value +="";}
+                    value += dataPermission.value();
                 }
             }
         }
+        ThreadLocalUtil.setDataPermissions(value);
+        // 加一个注解
 
-
-        if (isPermi){
-            // 获取到原始sql语句
-            String sql = statementHandler.getBoundSql().getSql();
-            // 解析并返回新的SQL语句，只处理查询sql
-            if (mappedStatement.getSqlCommandType().toString().equals("SELECT")) {
-                sql = getSql(sql,deptIds,value,user.getId());
-                System.out.println(sql);
-            }
-            // 修改sql
-            metaObject.setValue("delegate.boundSql.sql", sql);
+        // 获取到原始sql语句
+        String sql = statementHandler.getBoundSql().getSql();
+        // 解析并返回新的SQL语句，只处理查询sql
+        if (mappedStatement.getSqlCommandType().toString().equals("SELECT")) {
+            sql = getSql(sql,deptIds,user.getId());
+            System.out.println(sql);
         }
+        // 修改sql
+        metaObject.setValue("delegate.boundSql.sql", sql);
         return invocation.proceed();
-
     }
 
     /**
@@ -127,9 +117,20 @@ public class DataPermissionsInterceptor implements Interceptor {
      * @param sql 原SQL
      * @return 新SQL
      */
-    private static String getSql(String sql,List<UserDataPermission> userDataPermissions,String value,Long userId) {
-        // deptIds 和 value 求并集
-        List<UserDataPermission> list = userDataPermissions.stream().filter(o->value.contains(o.getFieldName())).collect(Collectors.toList());
+    private static String getSql(String sql,List<UserDataPermission> userDataPermissions,Long userId) {
+        // deptIds 和 value 求交集
+        List<UserDataPermission> list = userDataPermissions.stream().filter(o->ThreadLocalUtil.getDataPermissions().contains(o.getFieldName())).collect(Collectors.toList());
+
+        List<String> dataPermissionsFiled = Arrays.stream(ThreadLocalUtil.getDataPermissions().split(",")).collect(Collectors.toList());
+        // 需要替换为有别名的字段
+        for(UserDataPermission userDataPermission:list){
+            for(String filedName:dataPermissionsFiled){
+                if( filedName.contains(userDataPermission.getFieldName()) ){
+                    userDataPermission.setFieldName(filedName);
+                    break;
+                }
+            }
+        }
 
         try {
             List<String> conditions = new ArrayList<>();
@@ -137,42 +138,37 @@ public class DataPermissionsInterceptor implements Interceptor {
                 String fieldName = userDataPermission.getFieldName();
                 int type = userDataPermission.getPermissionType();
                 String[] values = userDataPermission.getValues().split(",");
-
                 String condition = getConditions(fieldName,type,values);
-
                 if(condition != ""){
                     conditions.add(condition);
                 }
-
             }
-                if (conditions.size() == 0) {
-                    return sql;
+            if (conditions.size() == 0) {
+                return sql;
+            }
+            // 开始拼接
+            Select select = (Select) CCJSqlParserUtil.parse(sql);
+            PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
+
+            //增加新的where条件
+
+            for(String condition  :conditions){
+                //取得最新的where
+                final Expression expression = plainSelect.getWhere();
+
+                final Expression envCondition = CCJSqlParserUtil.parseCondExpression(condition);
+                if (expression == null) {
+                    plainSelect.setWhere(envCondition);
+                } else {
+                    AndExpression andExpression = new AndExpression(expression, envCondition);
+                    plainSelect.setWhere(andExpression);
                 }
-
-                // 开始拼接
-                Select select = (Select) CCJSqlParserUtil.parse(sql);
-                PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
-
-                //增加新的where条件
-
-                for(String condition  :conditions){
-                    //取得最新的where
-                    final Expression expression = plainSelect.getWhere();
-
-                    final Expression envCondition = CCJSqlParserUtil.parseCondExpression(condition);
-                    if (expression == null) {
-                        plainSelect.setWhere(envCondition);
-                    } else {
-                        AndExpression andExpression = new AndExpression(expression, envCondition);
-                        plainSelect.setWhere(andExpression);
-                    }
-                }
-                return plainSelect.toString();
+            }
+            return plainSelect.toString();
 
         } catch (JSQLParserException e) {
             return sql;
         }
-
     }
     public static String getConditions(String fieldName,int type,String[] values){
         switch (type){

@@ -2,6 +2,7 @@ package com.data.permissions.controller;
 
 
 import com.data.permissions.bean.DO.DaySaleDO;
+import com.data.permissions.bean.DO.DaySaleRequest;
 import com.data.permissions.service.DataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,9 +19,8 @@ public class DataController {
     private DataService dataService;
 
     @GetMapping("/getSaleDate")
-    public int getSaleDate(){
+    public int getSaleDate(DaySaleRequest daySaleRequest){
         List<DaySaleDO> list  = dataService.getDaySale();
-
         return 1;
     }
 }

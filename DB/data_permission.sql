@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `data_permission`;
 CREATE TABLE `data_permission` (
   `id` int DEFAULT NULL COMMENT 'id',
   `fieldName` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '字段名',
-  `permissionType` int DEFAULT NULL COMMENT '拦截方式：1 in、2 = 、3 between'
+  `permissionType` int DEFAULT NULL COMMENT '拦截方式：1 in、2 between'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ----------------------------

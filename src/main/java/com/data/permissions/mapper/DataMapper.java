@@ -9,7 +9,8 @@ import java.util.List;
 
 @Mapper
 public interface DataMapper extends BaseMapper<DaySaleDO> {
-    @DataPermission("acc_date,store_code")
+
+    //@DataPermission("acc_date,store_code")
     public List<DaySaleDO> getDaySale();
 
 
