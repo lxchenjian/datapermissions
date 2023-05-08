@@ -10,4 +10,20 @@
             *
         from gds_day_sale a
     </select>
+    <select id="getDataPermission" resultType="com.data.permissions.bean.DO.UserDataPermission">
+        select
+            dp.fieldName,
+            dp.permissionType,
+            udp.values
+            from data_permission dp
+            inner join user_data_permission udp
+            on dp.id = udp.permission_id
+        where udp.user_id = 123
+    </select>
+
+
+    <select id="getPromotionSelectSingle" resultType="com.data.permissions.bean.DO.PromotionSelectionSingle">
+        select *
+            from  promotion_selection_single
+    </select>
 </mapper>

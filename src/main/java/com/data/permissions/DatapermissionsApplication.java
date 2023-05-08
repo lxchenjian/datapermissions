@@ -1,5 +1,7 @@
 package com.data.permissions;
 
+import com.data.permissions.interceptor.DataPermissionsInterceptor;
+import com.data.permissions.mapper.DataMapper;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,9 +20,9 @@ public class DatapermissionsApplication {
 		ConfigurableApplicationContext run = SpringApplication.run(DatapermissionsApplication.class, args);
 
 		// 2、查看容器里面的组件
-		String[] names = run.getBeanDefinitionNames();
-		for(String name : names){
-			System.out.println(name);
-		}
+		DataMapper bean1 = run.getBean(DataMapper.class);
+		DataPermissionsInterceptor bean = run.getBean(DataPermissionsInterceptor.class);
+
+		System.out.println();
 	}
 }

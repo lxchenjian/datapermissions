@@ -20,7 +20,7 @@ public class DataPermissions2Interceptor extends HandlerInterceptorAdapter {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         HandlerMethod handlerMethod=(HandlerMethod)handler;
         Class[] methodParams = handlerMethod.getMethod().getParameterTypes();
-        if(methodParams.length <= 0){
+        if(methodParams.length == 0){
             return super.preHandle(request, response, handler);
         }
         String value ="";

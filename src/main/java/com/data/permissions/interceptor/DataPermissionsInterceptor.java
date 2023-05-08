@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.data.permissions.annotation.DataPermission;
 import com.data.permissions.bean.DO.UserDO;
 import com.data.permissions.bean.DO.UserDataPermission;
+import com.data.permissions.mapper.DataMapper;
 import com.data.permissions.util.ClassUtil;
 import com.data.permissions.util.ThreadLocalUtil;
 import net.sf.jsqlparser.JSQLParserException;
@@ -22,6 +23,7 @@ import org.apache.ibatis.plugin.Invocation;
 import org.apache.ibatis.plugin.Signature;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -36,28 +38,31 @@ import java.util.stream.Collectors;
 //@Intercepts(@Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class}))
 public class DataPermissionsInterceptor implements Interceptor {
 
-    // 是否拦截的参数
-    // 扫描范围
-    @Value("jc.dataPermissions.packagePath")
-    private String packagePath;
-
+    // openfign
+    private final DataMapper dataMapper;
 
     // 存代码里面不好维护
     //private final static String DEPT_ID = "dept_id";
     //private final static String USER_ID = "create_user";
 
+
+    public DataPermissionsInterceptor(DataMapper dataMapper) {
+        this.dataMapper = dataMapper;
+    }
+
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
 
         // 0、获取用户权限
-        List<UserDataPermission> userDataPermissions = new ArrayList<>();
-        List<String> accDateValue = new ArrayList<>();
-        userDataPermissions.add(new UserDataPermission("acc_date",1,"2023-02-02,2023-03-03"));
+//        List<UserDataPermission> userDataPermissions = new ArrayList<>();
+//        List<String> accDateValue = new ArrayList<>();
+//        userDataPermissions.add(new UserDataPermission("acc_date",1,"2023-02-02,2023-03-03"));
+//
+//        List<String> storeValue = new ArrayList<>();
+//        userDataPermissions.add(new UserDataPermission("store_code",1,"819,820"));
 
-        List<String> storeValue = new ArrayList<>();
-        userDataPermissions.add(new UserDataPermission("store_code",1,"819,820"));
-
-        UserDO user = new UserDO(1L,"小民",userDataPermissions);
+        List<UserDataPermission> userDataPermissions = dataMapper.getDataPermission();
+        UserDO user = new UserDO(new Long(1L),"小民",userDataPermissions);
 
         if (user == null){
             return invocation.proceed();
