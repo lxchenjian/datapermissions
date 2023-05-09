@@ -1,0 +1,42 @@
+server:
+  port: 8888
+
+
+#bootstrap.yml优先级比application.yml优先级 高
+spring:
+  #prefix−{spring.profile.active}.${file-extension}
+  #nacos会根据当前环境去拼接配置名称查找相应配置文件，
+  #示例：{spring.application.name}-{spring.profiles.active}-{spring.cloud.nacos.config.file-extension}
+  #获取到值：nacos-autoconfig-service-dev.yml
+  profiles:
+    #开发环境dev，测试环境test，生产环境prod
+    active: dev
+
+  application:
+    #配置应用的名称，用于获取配置
+    name: data-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.1.170:8848
+      config:
+        #nacos配置中心地址
+        server-addr: 192.168.1.170:8848
+        #配置中心的命名空间id
+        namespace: 33d8fad9-5946-43f2-979a-821d26f4e676
+        #配置分组，默认没有也可以
+        group: DEFAULT_GROUP
+        #配置文件后缀，用于拼接配置配置文件名称，目前只支持yml和properties
+        file-extension: yml
+        #配置自动刷新
+        refresh-enabled: true
+        #配置文件的前缀，默认是application.name的值，如果配了prefix，就取prefix的值
+        #prefix: nacos-autoconfig-service-${spring.profile.active}
+        # 配置编码
+        encode: UTF-8
+
+management:
+  endpoint:
+    web:
+      exposure:
+        include:'*'
