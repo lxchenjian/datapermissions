@@ -1,7 +1,5 @@
 package com.datapermissions.common.bean.DO;
 
-import java.util.List;
-
 public class UserDataPermission {
 
     private String fieldName;

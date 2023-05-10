@@ -17,6 +17,13 @@
         <java.version>8</java.version>
     </properties>
     <dependencies>
+        <!-- feign -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <version>3.1.5</version>
+        </dependency>
+
         <!-- web  -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
