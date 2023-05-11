@@ -1,7 +1,9 @@
-package com.data.permissions.interceptor;
+package com.datapermissions.common.interceptor;
 
 import com.datapermissions.common.annotation.DataPermissionOnClass;
 import com.datapermissions.common.annotation.DataPermissionOnField;
+import com.datapermissions.common.annotation.DisableDataPermission;
+import com.datapermissions.common.bean.DO.DataPermission;
 import com.datapermissions.common.util.ThreadLocalUtil;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
@@ -20,29 +22,40 @@ public class DataPermissions2Interceptor extends HandlerInterceptorAdapter {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if(handler instanceof HandlerMethod){
             HandlerMethod handlerMethod=(HandlerMethod)handler;
+
+            DataPermission value = new DataPermission();
+            DisableDataPermission dataPermissionOnController =handlerMethod.getMethod().getAnnotation(DisableDataPermission.class);
+            if(dataPermissionOnController!=null){
+                value.setWhetherToIntercept(false);
+            }
+
             Class[] methodParams = handlerMethod.getMethod().getParameterTypes();
             if(methodParams.length == 0){
                 return super.preHandle(request, response, handler);
             }
 
-            String value ="";
+            String interceptFields = value.getInterceptFields();
             for(Class methodParam:methodParams){
                 if(methodParam.getAnnotation(DataPermissionOnClass.class) != null){
                     String temp = ((DataPermissionOnClass)methodParam.getAnnotation(DataPermissionOnClass.class)).value();
                     if(temp != ""){
-                        if(value!=""){ value+=",";}
-                        value+=temp;
+                        if(interceptFields!=""){
+                            interceptFields+=",";
+                        }
+                        interceptFields+=temp;
                     }
+                    // 最后是否拦截，存在false，就不拦截
                 }
 
                 Field[] fields = methodParam.getDeclaredFields();
                 for(Field field:fields){
                     if( field.getAnnotation(DataPermissionOnField.class) != null ){
-                        if(value!="" && field.getAnnotation(DataPermissionOnField.class).value()!=""){ value+=",";}
-                        value+=field.getAnnotation(DataPermissionOnField.class).value();
+                        if(interceptFields!="" && field.getAnnotation(DataPermissionOnField.class).value()!=""){ interceptFields+=",";}
+                        interceptFields+=field.getAnnotation(DataPermissionOnField.class).value();
                     }
                 }
             }
+            value.setInterceptFields(interceptFields);
             ThreadLocalUtil.setDataPermissions(value);
         }
 

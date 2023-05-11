@@ -1,6 +1,6 @@
 package com.datapermissions.common.config;
 
-import com.data.permissions.interceptor.DataPermissions2Interceptor;
+import com.datapermissions.common.interceptor.DataPermissions2Interceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;

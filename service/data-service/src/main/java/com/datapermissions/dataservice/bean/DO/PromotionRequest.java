@@ -1,13 +1,16 @@
 package com.datapermissions.dataservice.bean.DO;
 
 
+import com.datapermissions.common.annotation.DataPermissionOnClass;
+import com.datapermissions.common.annotation.DataPermissionOnField;
+
 import java.util.Objects;
 
-//@DataPermissionOnClass("goods_code")
+@DataPermissionOnClass("goods_code")
 public class PromotionRequest {
-    //@DataPermissionOnField("auction_code")
+    @DataPermissionOnField("auction_code")
     private String auctionCode;
-    //@DataPermissionOnField("front_code")
+    @DataPermissionOnField("front_code")
     private String frontCode;
 
     public String getAuctionCode() {

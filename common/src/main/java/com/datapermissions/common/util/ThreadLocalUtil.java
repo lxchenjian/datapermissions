@@ -1,5 +1,6 @@
 package com.datapermissions.common.util;
 
+import com.datapermissions.common.bean.DO.DataPermission;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
@@ -15,21 +16,18 @@ import java.util.Map;
 public class ThreadLocalUtil {
 
     private static final ThreadLocal<Map<String, Object>> threadLocal = ThreadLocal.withInitial(() -> new HashMap<>(10));
+    private static final ThreadLocal<DataPermission> dataPermissions = ThreadLocal.withInitial(() -> new DataPermission());
 
-
-    private static final ThreadLocal<String> dataPermissions = ThreadLocal.withInitial(() -> new String());
-
-    public static String getDataPermissions() {
+    public static DataPermission getDataPermissions() {
         return dataPermissions.get();
     }
 
-    public static void setDataPermissions(String value) {
+    public static void setDataPermissions(DataPermission value) {
         dataPermissions.set(value);
     }
     public static void removeDataPermissions() {
         dataPermissions.remove();
     }
-
 
     public static Map<String, Object> getThreadLocal() {
         return threadLocal.get();

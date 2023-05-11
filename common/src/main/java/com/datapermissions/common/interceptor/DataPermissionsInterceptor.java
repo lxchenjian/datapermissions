@@ -1,9 +1,11 @@
 package com.datapermissions.common.interceptor;
 
 import com.baomidou.mybatisplus.core.toolkit.PluginUtils;
-import com.datapermissions.common.annotation.DataPermission;
+import com.datapermissions.common.annotation.DataPermissionOnMapper;
+import com.datapermissions.common.bean.DO.DataPermission;
 import com.datapermissions.common.bean.DO.UserDO;
 import com.datapermissions.common.bean.DO.UserDataPermission;
+import com.datapermissions.common.client.UcServiceFeign;
 import com.datapermissions.common.util.ThreadLocalUtil;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -19,6 +21,7 @@ import org.apache.ibatis.plugin.Invocation;
 import org.apache.ibatis.plugin.Signature;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -32,18 +35,30 @@ import java.util.stream.Collectors;
 //@Intercepts(@Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class}))
 public class DataPermissionsInterceptor implements Interceptor {
 
+    @Autowired
+    private final UcServiceFeign ucServiceFeign;
+
+    public DataPermissionsInterceptor(UcServiceFeign ucServiceFeign) {
+        this.ucServiceFeign = ucServiceFeign;
+    }
+
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
 
+        boolean whetherToIntercept = ThreadLocalUtil.getDataPermissions().getWhetherToIntercept();
+        if(!whetherToIntercept){
+            return invocation.proceed();
+        }
+
         // 0、获取用户权限
-        List<UserDataPermission> userDataPermissions = new ArrayList<>();
-        List<String> accDateValue = new ArrayList<>();
-        userDataPermissions.add(new UserDataPermission("acc_date",1,"2023-02-02,2023-03-03"));
+//        List<UserDataPermission> userDataPermissions = new ArrayList<>();
+//        List<String> accDateValue = new ArrayList<>();
+//        userDataPermissions.add(new UserDataPermission("acc_date",1,"2023-02-02,2023-03-03"));
+//
+//        List<String> storeValue = new ArrayList<>();
+//        userDataPermissions.add(new UserDataPermission("store_code",1,"819,820"));
 
-        List<String> storeValue = new ArrayList<>();
-        userDataPermissions.add(new UserDataPermission("store_code",1,"819,820"));
-
-//        List<UserDataPermission> userDataPermissions = dataMapper.getDataPermission();
+        List<UserDataPermission> userDataPermissions = ucServiceFeign.getUserPermission("123");
         UserDO user = new UserDO(new Long(1L),"小民",userDataPermissions);
 
         if (user == null){
@@ -69,20 +84,22 @@ public class DataPermissionsInterceptor implements Interceptor {
         String newId = mappedStatement.getId().substring(0, mappedStatement.getId().lastIndexOf("."));
         String newName = mappedStatement.getId().substring(mappedStatement.getId().lastIndexOf(".") + 1, mappedStatement.getId().length());
         // 获取注解的参数值 判断是否数据拦截
-        String value = ThreadLocalUtil.getDataPermissions();
+        String value = ThreadLocalUtil.getDataPermissions().getInterceptFields();
         Class<?> clazz = Class.forName(newId);
         //遍历方法
         for (Method method : clazz.getDeclaredMethods()) {
             //方法是否含有DataPermission注解，如果含有注解则将数据结果过滤
-            if (method.isAnnotationPresent(DataPermission.class) && newName.equals(method.getName())) {
-                DataPermission dataPermission =  method.getAnnotation(DataPermission.class);
+            if (method.isAnnotationPresent(DataPermissionOnMapper.class) && newName.equals(method.getName())) {
+                DataPermissionOnMapper dataPermission =  method.getAnnotation(DataPermissionOnMapper.class);
                 if (dataPermission != null) {
                     if(value !="" && dataPermission.value() !="") {value +="";}
                     value += dataPermission.value();
                 }
             }
         }
-        ThreadLocalUtil.setDataPermissions(value);
+        DataPermission dataPermission = ThreadLocalUtil.getDataPermissions();
+        dataPermission.setInterceptFields(value);
+        ThreadLocalUtil.setDataPermissions(dataPermission);
         // 加一个注解
 
         // 获取到原始sql语句
@@ -106,9 +123,9 @@ public class DataPermissionsInterceptor implements Interceptor {
      */
     private static String getSql(String sql,List<UserDataPermission> userDataPermissions,Long userId) {
         // deptIds 和 value 求交集
-        List<UserDataPermission> list = userDataPermissions.stream().filter(o->ThreadLocalUtil.getDataPermissions().contains(o.getFieldName())).collect(Collectors.toList());
+        List<UserDataPermission> list = userDataPermissions.stream().filter(o->ThreadLocalUtil.getDataPermissions().getInterceptFields().contains(o.getFieldName())).collect(Collectors.toList());
 
-        List<String> dataPermissionsFiled = Arrays.stream(ThreadLocalUtil.getDataPermissions().split(",")).collect(Collectors.toList());
+        List<String> dataPermissionsFiled = Arrays.stream(ThreadLocalUtil.getDataPermissions().getInterceptFields().split(",")).collect(Collectors.toList());
         // 需要替换为有别名的字段
         for(UserDataPermission userDataPermission:list){
             for(String filedName:dataPermissionsFiled){
@@ -165,9 +182,9 @@ public class DataPermissionsInterceptor implements Interceptor {
                         if (values.length > 0) {
                             for (String deptId : values) {
                                 if ("(".equals(permissionSql)) {
-                                    permissionSql = permissionSql + deptId;
+                                    permissionSql = permissionSql +"'" +deptId+"'";
                                 } else {
-                                    permissionSql = permissionSql + "," + deptId;
+                                    permissionSql = permissionSql + "," +"'" +deptId+"'";
                                 }
                             }
                             permissionSql = permissionSql + ")";

@@ -1,11 +1,13 @@
 package com.datapermissions.dataservice.bean.DO;
 
 
+import com.datapermissions.common.annotation.DataPermissionOnClass;
+import com.datapermissions.common.annotation.DataPermissionOnField;
 
-//@DataPermissionOnClass("a.store_code")
+@DataPermissionOnClass("a.store_code")
 public class DaySaleRequest {
 
-    //@DataPermissionOnField("a.acc_date")
+    @DataPermissionOnField("a.acc_date")
     private String accDate;
 
     public String getAccDate() {

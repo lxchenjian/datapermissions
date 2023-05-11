@@ -1,6 +1,8 @@
 package com.datapermissions.dataservice.controller;
 
 import com.datapermissions.dataservice.bean.DO.DaySaleDO;
+import com.datapermissions.dataservice.bean.DO.DaySaleRequest;
+import com.datapermissions.dataservice.bean.DO.PromotionRequest;
 import com.datapermissions.dataservice.service.DataService;
 import com.datapermissions.dataservice.service.PromotionSelectionSingleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +29,7 @@ public class DataController {
     }
 
     @GetMapping("/getSaleDate_permission")
-    public int getSaleDate_datapermission(){
+    public int getSaleDate_datapermission(DaySaleRequest daySaleRequest){
         List<DaySaleDO> list  = dataService.getDaySale();
         return 1;
     }
@@ -39,7 +41,7 @@ public class DataController {
     }
 
     @GetMapping("/getPromotionSelectionSingle_permission")
-    public int getPromotionSelectionSingle_permission(){
+    public int getPromotionSelectionSingle_permission(PromotionRequest promotionRequest){
         promotionSelectionSingleService.getPromotionSelectionSingle();
         return 1;
     }
